@@ -5,6 +5,7 @@ import com.google.zxing.*;
 import com.google.zxing.client.j2se.BufferedImageLuminanceSource;
 import com.google.zxing.common.HybridBinarizer;
 import com.hackattic.problems.backup_restore.BackupRestoreProblem;
+import com.hackattic.problems.jotting_jwt.JWTProblem;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +27,7 @@ import java.util.Optional;
 public class HackAtticApplication implements ApplicationListener<ApplicationReadyEvent> {
 
     @Autowired
-    BackupRestoreProblem backupRestoreProblem;
+    JWTProblem problem;
 
     public static void main(String[] args) {
         SpringApplication.run(HackAtticApplication.class, args);
@@ -36,6 +37,6 @@ public class HackAtticApplication implements ApplicationListener<ApplicationRead
     @Override
     public void onApplicationEvent(ApplicationReadyEvent event) {
         log.info("Application is ready");
-        backupRestoreProblem.solveProblem();
+        problem.solveProblem();
     }
 }
