@@ -14,6 +14,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -32,8 +33,13 @@ public class JWTProblem implements HackAtticProblem {
 	private final UrlMaker urlMaker;
 	private final ObjectMapper objectMapper;
 	private final List<String> data = new CopyOnWriteArrayList<>();
-	Base64.Decoder decoder = Base64.getUrlDecoder();
+	private final Base64.Decoder decoder = Base64.getUrlDecoder();
 	private String jwtSecret;
+
+	// pre-req have a ngrok tunnel for port app is running
+	// example command for port 8080 -> ngrok http --region in 8080
+	@Value("hackattic.jotting_jwts.app.url")
+	private String appUrl;
 
 	@Override
 	public String problemName() {
@@ -93,29 +99,17 @@ public class JWTProblem implements HackAtticProblem {
 
 	@Override
 	public void solveProblem() {
-		// pre-req have a ngrok tunnel for port 8080
-		// command -> ngrok http --region in 8080
 		Request request = hackatticAdapter.getProblemData(urlMaker.getProblemURL(this), Request.class);
 
 		this.jwtSecret = request.jwt_secret;
 
-		// ngrok url
-		var responseData = new Response(
-				/*APP_URL*/
-		);
-		hackatticAdapter.submitSolution(urlMaker.getSolutionURL(this), responseData);
+		hackatticAdapter.submitSolution(urlMaker.getSolutionURL(this), new Response(appUrl));
 	}
 }
 
 @Data
 class Request {
 	String jwt_secret;
-}
-
-
-@Data
-class IncomingRequest {
-	String append;
 }
 
 @Data
