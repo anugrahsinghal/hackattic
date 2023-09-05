@@ -55,7 +55,8 @@ public class HelpMeUnpack implements HackAtticProblem {
         byte[] bytes = Base64.getDecoder().decode(request.getBase64bytes());
         System.out.println("Number of bytes = " + bytes.length);
         System.out.println(Arrays.toString(bytes));
-
+        final ByteBuffer unpackedBytes = ByteBuffer.wrap(bytes);
+        /*
         final ByteBuffer signedIntBuffer = ByteBuffer.wrap(rangeOf(bytes, 0, 4));
         final ByteBuffer unSignedIntBuffer = ByteBuffer.wrap(rangeOf(bytes, 4, 8));
         // skip 2 bytes ? - short take only 2 bytes so you can do 8-10
@@ -66,15 +67,18 @@ public class HelpMeUnpack implements HackAtticProblem {
         final ByteBuffer floatBuffer = ByteBuffer.wrap(rangeOf(bytes, 12, 16));
         final ByteBuffer doubleBuffer = ByteBuffer.wrap(rangeOf(bytes, 16, 24));
         final ByteBuffer doubleBufferBigEndian = ByteBuffer.wrap(rangeOf(bytes, 24, 32));
+        */
 
+        // uses the relative position reading feature of ByteBuffer to unpack the byte[]
         final Response response = new Response(
-                signedIntBuffer.order(ByteOrder.LITTLE_ENDIAN).getInt(0),
-                Integer.toUnsignedLong(unSignedIntBuffer.order(ByteOrder.LITTLE_ENDIAN).getInt(0)),
-                (short) signedShortBuffer.order(ByteOrder.LITTLE_ENDIAN).getInt(0),
-                floatBuffer.order(ByteOrder.LITTLE_ENDIAN).getFloat(0),
-                doubleBuffer.order(ByteOrder.LITTLE_ENDIAN).getDouble(0),
-                doubleBufferBigEndian.order(ByteOrder.BIG_ENDIAN).getDouble(0)
+                unpackedBytes.order(ByteOrder.LITTLE_ENDIAN).getInt(),
+                Integer.toUnsignedLong(unpackedBytes.order(ByteOrder.LITTLE_ENDIAN).getInt()),
+                (short) unpackedBytes.order(ByteOrder.LITTLE_ENDIAN).getInt(),
+                unpackedBytes.order(ByteOrder.LITTLE_ENDIAN).getFloat(),
+                unpackedBytes.order(ByteOrder.LITTLE_ENDIAN).getDouble(),
+                unpackedBytes.order(ByteOrder.BIG_ENDIAN).getDouble()
         );
+
         log.info("response = {}", new ObjectMapper().writeValueAsString(response));
         final ProblemResult problemResult = hackatticAdapter.submitSolution(urlMaker.getSolutionURL(this, true), response);
         log.info("Result : {}", problemResult.result());
